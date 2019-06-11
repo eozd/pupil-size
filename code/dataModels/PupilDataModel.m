@@ -159,7 +159,7 @@ classdef PupilDataModel < handle
     methods
         
         %==================================================================
-        function obj = PupilDataModel(filepath,filename,settings)
+        function obj = PupilDataModel(diameterUnit, diameter, segmentsTable, zeroTime_ms, settings)
             % Constructs a PupilDataModel instance given the filename,
             % filepath and settings.
             %
@@ -169,39 +169,34 @@ classdef PupilDataModel < handle
             %    constructor method.
             %
             %--------------------------------------------------------------
-            
+
+            check_inputs(diameter);
+
             obj.segmentsTable = table();
+            obj.zeroTime_ms = 0;
             
-            
-            if nargin>0
-                obj.filename = filename;
-                obj.filepath = filepath;
-                
-                % Load the data from the mat file:
-                s = load(fullfile(filepath, filename));
-                
-                % Save data to object:
-                obj.timestamps_RawData_ms = s.diameter.t_ms;
-                if ~isempty(s.diameter.L)
-                    obj.eyesWithData = {'left'};
-                    obj.leftPupil_RawData ...
-                        = RawSamplesModel('left',obj,s.diameter.L);
-                end
-                if ~isempty(s.diameter.R)
-                    obj.eyesWithData = [obj.eyesWithData {'right'}];
-                    obj.rightPupil_RawData ...
-                        = RawSamplesModel('right',obj,s.diameter.R);
-                end
-                
-                obj.segmentsTable  = s.segmentsTable;
-                obj.zeroTime_ms    = s.zeroTime_ms;
-                obj.diameterUnit   = s.diameterUnit;
-                
-                % Save settings:
-                obj.settings = settings;
-                
+            obj.diameterUnit   = diameterUnit;
+            obj.timestamps_RawData_ms = diameter.t_ms;
+            if ~isempty(diameter.L)
+                obj.eyesWithData = {'left'};
+                obj.leftPupil_RawData ...
+                    = RawSamplesModel('left',obj,diameter.L);
+            end
+            if ~isempty(diameter.R)
+                obj.eyesWithData = [obj.eyesWithData {'right'}];
+                obj.rightPupil_RawData ...
+                    = RawSamplesModel('right',obj,diameter.R);
             end
             
+            if nargin > 2
+                obj.segmentsTable  = segmentsTable;
+            end
+            if nargin > 3
+                obj.zeroTime_ms    = zeroTime_ms;
+            end
+            if nargin > 4
+                obj.settings = settings;
+            end
         end
         
     end
@@ -785,3 +780,22 @@ classdef PupilDataModel < handle
 end
 
 
+function check_inputs(diameter)
+    assert(all(ismember(fieldnames(diameter),{'t_ms' 'L' 'R'}))...
+        ,['The diameter struct must contain the'...
+        ' ''t_ms'', ''L'' and ''R'' fields.']);
+    assert(isempty(diameter.t_ms)||isvector(diameter.t_ms)...
+        ,'''t_ms'' must be a vector.');
+    assert(isempty(diameter.L)||isvector(diameter.L)...
+        ,'''L'' must be a vector, or be empty.');
+    assert(isempty(diameter.R)||isvector(diameter.R)...
+        ,'''R'' must be a vector, or be empty.');
+    assert(isempty(diameter.L)||length(diameter.t_ms)==length(diameter.L)...
+        ,['''L'' must be empty, or have the same'...
+        ' length as ''t_ms''.']);
+    assert(isempty(diameter.R)||length(diameter.t_ms)==length(diameter.R)...
+        ,['''R'' must be empty, or have the same'...
+        ' length as ''t_ms''.']);
+    assert(isempty(diameter.t_ms)||issorted(diameter.t_ms)...
+        ,'t_ms must be sorted!')
+end
