@@ -172,16 +172,13 @@ classdef PupilDataModel < handle
             
             obj.segmentsTable = table();
             
-            % Compatibility check:
-            assert(ispc,['This script will not work on any OS other'...
-                ' than Windows.']);
             
             if nargin>0
                 obj.filename = filename;
-                obj.filepath = [filepath '\'];
+                obj.filepath = filepath;
                 
                 % Load the data from the mat file:
-                s = load([filepath filename]);
+                s = load(fullfile(filepath, filename));
                 
                 % Save data to object:
                 obj.timestamps_RawData_ms = s.diameter.t_ms;

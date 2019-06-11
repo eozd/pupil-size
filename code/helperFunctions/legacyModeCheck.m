@@ -3,8 +3,9 @@ function legacyModeCheck()
 % than 8.3, which is when the table datatype was introduced. See files in
 % .\LEGACY\ folder.
 
+legacy_dir = fullfile('..', '..', 'helperFunctions', 'LEGACY');
 if verLessThan('matlab','8.3')
-    addpath('..\..\helperFunctions\LEGACY\');
+    addpath(legacy_dir);
     uiwait(warndlg({['The script is running in legacy mode '...
         'because you are using an old MATLAB version.'] ...
         '' ['This means that the results will be of type "dataset"'...
@@ -21,7 +22,7 @@ if verLessThan('matlab','8.3')
     
 else
     warning('off','MATLAB:rmpath:DirNotFound')
-    rmpath('..\..\helperFunctions\LEGACY');
+    rmpath(legacy_dir);
     warning('on','MATLAB:rmpath:DirNotFound');
 end
 end
