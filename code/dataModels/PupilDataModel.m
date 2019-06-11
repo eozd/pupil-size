@@ -606,7 +606,9 @@ classdef PupilDataModel < handle
             
             % Link axes and plot segments:
             linkaxes(findobj(hParent,'Type','Axes'),'x');
-            plotSegments(segmentsAxes,obj.segmentsTable);
+            if ~isempty(obj.segmentsTable.segmentStart)
+                plotSegments(segmentsAxes,obj.segmentsTable);
+            end
             
         end
         
